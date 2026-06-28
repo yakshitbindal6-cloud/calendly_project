@@ -1,0 +1,103 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model user {
+  user_id          Int                 @id @default(autoincrement())
+  email            String              @unique
+  name             String
+  createAt         DateTime            @default(now())
+  updateAt         DateTime            @updatedAt
+  events           event[]
+  invitee_bookings booking[]           @relation("invitee_bookings")
+  availability     availability_pref[] @relation("availability_pref")
+  holidays         holiday[]           @relation("holidays")
+
+  @@map("user") //In Prisma, @@map is used to map a Prisma model to an existing database table name
+}
+
+// a user can have many events and an event can have only one user.(one to many)
+model event {
+  event_id         Int       @id @default(autoincrement())
+  user_id          Int
+  duration         Int
+  title            String
+  slug             String    @unique
+  description      String?
+  isActive         Boolean   @default(true)
+  locationType     String    @default("online")
+  locationValue    String?
+  bufferbeforeTime Int       @default(0)
+  bufferafterTime  Int       @default(0)
+  createAt         DateTime  @default(now())
+  updateAt         DateTime  @updatedAt
+  host             user      @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  bookings         booking[] @relation("event_bookings")
+  slots            slot[]    @relation("slots")
+
+  @@map("event")
+}
+
+model booking {
+  booking_id Int      @id @default(autoincrement())
+  event_id   Int
+  invitee_id Int
+  status     String   @default("pending")
+  startTime  DateTime
+  endTime    DateTime
+  guestName  String
+  guestEmail String
+  createAt   DateTime @default(now())
+  updateAt   DateTime @updatedAt
+  invitee    user     @relation("invitee_bookings", fields: [invitee_id], references: [user_id], onDelete: Cascade)
+  event      event    @relation("event_bookings", fields: [event_id], references: [event_id], onDelete: Cascade)
+
+  @@map("booking")
+}
+
+model availability_pref {
+  pref_id     Int      @id @default(autoincrement())
+  user_id     Int
+  day         String
+  start_time  DateTime
+  end_time    DateTime
+  duration    Int
+  isrecurring Boolean  @default(false)
+  createAt    DateTime @default(now())
+  updateAt    DateTime @updatedAt
+  user        user     @relation("availability_pref", fields: [user_id], references: [user_id], onDelete: Cascade)
+}
+
+model holiday {
+  holiday_id Int      @id @default(autoincrement())
+  user_id    Int
+  date       DateTime
+  start_time DateTime
+  end_time   DateTime
+  createAt   DateTime @default(now())
+  updateAt   DateTime @updatedAt
+  user       user     @relation("holidays", fields: [user_id], references: [user_id], onDelete: Cascade)
+}
+
+model slot {
+  slot_id    Int      @id @default(autoincrement())
+  event_id   Int
+  day        String
+  date       DateTime
+  start_time DateTime
+  end_time   DateTime
+  is_booked  Boolean  @default(false)
+  createAt   DateTime @default(now())
+  updateAt   DateTime @updatedAt
+  event      event    @relation("slots", fields: [event_id], references: [event_id], onDelete: Cascade)
+}
