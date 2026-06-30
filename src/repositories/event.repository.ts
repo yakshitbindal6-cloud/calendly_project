@@ -61,3 +61,13 @@ export async function getEventBySlug(slug:event_slugDto['slug']){
     if (!event) throw notFound("Event not found");
     return event;
 }
+export async function SlugExistsforHost(user_id:number,slug:event_slugDto['slug']){
+    const exist=await prisma.event.findFirst({
+         where:{
+            user_id,
+            slug
+        }
+    })
+    return exist !== null;;
+   
+}
