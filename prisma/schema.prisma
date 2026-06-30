@@ -32,7 +32,7 @@ model event {
   user_id          Int
   duration         Int
   title            String
-  slug             String    @unique
+  slug             String    
   description      String?
   isActive         Boolean   @default(true)
   locationType     String    @default("online")
@@ -46,6 +46,7 @@ model event {
   slots            slot[]    @relation("slots")
 
   @@map("event")
+  @@unique([user_id,slug ]) //In Prisma, @@unique is used to create a unique constraint on multiple fields in a model
 }
 
 model booking {

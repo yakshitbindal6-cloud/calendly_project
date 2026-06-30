@@ -5,7 +5,7 @@ export const create_eventScema=z.object({
     slug:z.string()
         .min(1,"slug is required")
         .max(150,"slug must be less than 150 characters")
-        .regex(/^[a-z0-9-]+$/, "slug can only contain lowercase letters, numbers, and hyphens"),
+        .regex(/^[a-z0-9-]+$/, "slug can only contain lowercase letters, numbers, and hyphens").optional(),
     description:z.string().max(1000).optional(),
     isActive:z.boolean(),
     locationType:z.enum(["online","in-person"]).default("online"),
@@ -13,12 +13,7 @@ export const create_eventScema=z.object({
     bufferbeforeTime:z.number().min(0).max(120).default(0),
     bufferafterTime:z.number().min(0).max(120).default(0),
 })
-export const event_slugParams = z.object({
-    slug: z.string()
-        .min(1, "Invalid event slug")
-        .regex(/^[a-z0-9-]+$/, "Invalid event slug format")
-})
+
 export const update_eventScema= create_eventScema.partial()
 export type create_eventDto=z.infer<typeof create_eventScema>
 export type update_eventDto=z.infer<typeof update_eventScema>
-export type event_slugDto=z.infer<typeof event_slugParams>

@@ -1,8 +1,11 @@
 import { Router } from "express";
-import { validate, validateParams } from '../middlewares/validate.js';
-import {  add_event, getEvent_byuser, getEvent_by_slug } from "../controllers/event.controller.js";
-import { create_eventScema, event_slugParams } from "../dtos/event_dto.js";
+import { validate } from '../middlewares/validate.js';
+import { add_event, getEvent_byuser, delete_event, patch_event, get_public_event } from "../controllers/event.controller.js";
+import { create_eventScema, update_eventScema } from "../dtos/event_dto.js";
 export const event_Router=Router();
-event_Router.post('/',validate(create_eventScema),add_event);
-event_Router.get('/slug/:slug',validateParams(event_slugParams),getEvent_by_slug);
-event_Router.get('/:id',getEvent_byuser);
+
+event_Router.post('/:id', validate(create_eventScema), add_event);
+event_Router.get('/:id', getEvent_byuser);
+event_Router.patch('/:event_id', validate(update_eventScema), patch_event);
+event_Router.delete('/:user_id/:event_id', delete_event);
+event_Router.get('/public/:user_id/:slug', get_public_event);
