@@ -11,10 +11,6 @@ export async function get_user_events(user_id:number){
     return getEventsByHost(user_id);
 }
 export async function create_event(user_id:number,data:create_eventDto){
-    const user=await getbyid(user_id);
-     if (!user) {
-        throw notFound("user not found");
-    }
     const slug_pass=data.slug?? slug(data.title)
     if(!slug_pass){
         throw conflict("could not generate a slug for the event");
@@ -33,10 +29,17 @@ export async function remove_event(user_id:number,event_id:number){
     }
     return removeEvent(event_id)
 }
-export async function update_event(event_id:number,data:update_eventDto){
+export async function update_event(user_id:number,event_id:number,data:update_eventDto){
     const event=await getEventById(event_id);
     if (!event) {
         throw notFound("event not found");
+    }
+    if(event.user_id!=user_id){
+        throw forbidden("you are not authorized to update a event");
+    }
+    if(data.slug && data.slug!==event.slug){
+        const isSlug_taken=await SlugExistsforHost(user_id,data.slug);
+        if(isSlug_taken)throw conflict("event with this slug already exists, please use diffrent slug");
     }
     return updateEvent(event_id,data);
 }

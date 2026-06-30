@@ -11,11 +11,8 @@ app.get('/health', (req, res) => {
     timeStamp:new Date().toISOString()
     });
 });
-app.use('/users',userRouter);// if request starts with /users then it will be handled by userRouter
-app.use('/user_availability',user_avilRouter);
-app.use('/store_availability',aval_Router);
-app.use('/events',event_Router);
-app.use('/events/user',event_Router);
+app.use('/api/users',userRouter);// if request starts with /users then it will be handled by userRouter
+app.use('/api/users/events', event_Router);
 app.use(rout_notfound)
 app.use(errorhandler)
 export {app};
