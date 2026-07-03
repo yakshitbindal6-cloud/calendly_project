@@ -3,6 +3,7 @@ import { getall } from '../repositories/user.repository.js';
 import { getbyid,getbyemail } from '../repositories/user.repository.js';
 import { update,delete_user,create_user } from '../repositories/user.repository.js';
 import { badRequest, notFound } from '../utils/api_error.js';
+import slug from "slug"
 export async function getAllUsers(){
     const users=await getall();
     return users;
@@ -19,7 +20,11 @@ export async function add_user(data:CreateUserDto){
     if(exit_user){
         throw badRequest("User already exists");
     }
-    return create_user(data);
+    const slug_pass=data.slug? data.slug:slug(data.name,{lower:true}) // todo:make slug unique for user
+    if(!slug_pass){
+        throw badRequest("could not generate a slug for the user");
+    }
+    return create_user({...data,slug:slug_pass});
 }
 export async function remove_user(id:RemoveUserDto['id']){
     const user=await getbyid(id)

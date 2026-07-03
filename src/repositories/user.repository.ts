@@ -23,11 +23,12 @@ export async function getbyemail(email:string){
     });
     return user;
 }
-export async function create_user(data:CreateUserDto){
-    const user=await prisma.user.create({
-        data
+export async function create_user(data: CreateUserDto & {slug:string}) {
+    return prisma.user.create({
+        data: {
+            ...data,
+        },
     });
-    return user;
 }
 export async function delete_user(id:RemoveUserDto['id']){
      return prisma.user.delete({

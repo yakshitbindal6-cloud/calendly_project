@@ -55,7 +55,7 @@ model event {
 model availability_pref {
   pref_id     Int      @id @default(autoincrement())
   user_id     Int
-  day         String
+  weekday     Int
   start_time  String
   end_time    String
   timezone    String
@@ -65,7 +65,7 @@ model availability_pref {
   updateAt    DateTime @updatedAt
   user        user     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
-  @@index([user_id, day])
+  @@index([user_id, weekday])
   @@map("availability_pref")
 }
 
@@ -73,6 +73,7 @@ model holiday {
   holiday_id Int      @id @default(autoincrement())
   user_id    Int
   date       DateTime @db.Date
+  type       String
   start_time String?
   end_time   String?
   timezone   String   @default("UTC")

@@ -3,7 +3,7 @@ import {z} from "zod"
 export const userSchema = z.object({
     email: z.email("Invalid email address"),
     name: z.string().min(1, "Name is required").max(100, "Name must be less than 100 characters"),
-    slug: z.string().min(2, "Slug must be at least 2 characters").max(100, "Slug must be less than 100 characters")
+    slug: z.string().min(2, "Slug must be at least 2 characters").max(100, "Slug must be less than 100 characters").optional()
 })
 export const removeUserSchema = z.object({
     id: z.coerce.number().int().positive("Invalid user ID")
