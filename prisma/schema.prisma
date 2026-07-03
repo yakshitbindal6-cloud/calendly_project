@@ -13,18 +13,18 @@ datasource db {
 }
 
 model user {
-  user_id      Int                 @id @default(autoincrement())
-  email        String              @unique
-  name         String
-  slug         String              @unique
-  timezone     String              @default("UTC")
-  createAt     DateTime            @default(now())
-  updateAt     DateTime            @updatedAt
-  events       event[]
-  bookings     booking[]
-  availability availability_pref[]
-  holidays     holiday[]
-  slots        slot[]
+  user_id                 Int                      @id @default(autoincrement())
+  email                   String                   @unique
+  name                    String
+  slug                    String                   @unique
+  timezone                String                   @default("UTC")
+  createAt                DateTime                 @default(now())
+  updateAt                DateTime                 @updatedAt
+  events                  event[]
+  bookings                booking[]
+  availability            availability_pref[]
+  availability_exceptions availability_exception[]
+  slots                   slot[]
 
   @@map("user") //In Prisma, @@map is used to map a Prisma model to an existing database table name
 }
@@ -53,37 +53,36 @@ model event {
 }
 
 model availability_pref {
-  pref_id     Int      @id @default(autoincrement())
-  user_id     Int
-  weekday     Int
-  start_time  String
-  end_time    String
-  timezone    String
-  duration    Int
-  isrecurring Boolean  @default(false)
-  createAt    DateTime @default(now())
-  updateAt    DateTime @updatedAt
-  user        user     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  pref_id    Int      @id @default(autoincrement())
+  user_id    Int
+  weekday    Int
+  start_time String
+  end_time   String
+  timezone   String   @default("UTC")
+  isActive   Boolean  @default(true)
+  createAt   DateTime @default(now())
+  updateAt   DateTime @updatedAt
+  user       user     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
   @@index([user_id, weekday])
   @@map("availability_pref")
 }
 
-model holiday {
-  holiday_id Int      @id @default(autoincrement())
-  user_id    Int
-  date       DateTime @db.Date
-  type       String
-  start_time String?
-  end_time   String?
-  timezone   String   @default("UTC")
-  createAt   DateTime @default(now())
-  reason     String?
-  updateAt   DateTime @updatedAt
-  user       user     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+model availability_exception {
+  availability_exception_id Int      @id @default(autoincrement())
+  user_id                   Int
+  date                      DateTime @db.Date
+  type                      String
+  start_time                String?
+  end_time                  String?
+  timezone                  String   @default("UTC")
+  createAt                  DateTime @default(now())
+  reason                    String?
+  updateAt                  DateTime @updatedAt
+  user                      user     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
   @@index([user_id, date])
-  @@map("holiday")
+  @@map("availability_exception")
 }
 
 model slot {
