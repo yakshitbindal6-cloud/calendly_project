@@ -3,14 +3,15 @@ import { z } from "zod";
 const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
 const dateRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
 
-export const create_availability_exceptionSchema = z.object({
+export const create_availability_exceptionBaseSchema = z.object({
   date: z.string().regex(dateRegex, "Invalid date format, expected YYYY-MM-DD"),
   type: z.enum(["BLOCK_FULL_DAY", "BLOCK_PARTIAL", "ADD_AVAILABLE_WINDOW"]),
   start_time: z.string().regex(timeRegex, "Invalid time format, expected HH:mm").optional(),
   end_time: z.string().regex(timeRegex, "Invalid time format, expected HH:mm").optional(),
   timezone: z.string().default("UTC"),
   reason: z.string().max(500, "reason must be less than 500 characters").optional(),
-}).refine((data) => {
+})
+export const create_availability_exceptionSchema= create_availability_exceptionBaseSchema.refine((data) => {
   // BLOCK_FULL_DAY must not have start_time or end_time
   if (data.type === "BLOCK_FULL_DAY") {
     if (data.start_time || data.end_time) {
@@ -18,7 +19,6 @@ export const create_availability_exceptionSchema = z.object({
     }
     return true;
   }
-  
   // BLOCK_PARTIAL and ADD_AVAILABLE_WINDOW must have both start_time and end_time
   if (data.type === "BLOCK_PARTIAL" || data.type === "ADD_AVAILABLE_WINDOW") {
     if (!data.start_time || !data.end_time) {
@@ -41,7 +41,7 @@ export const create_availability_exceptionSchema = z.object({
   path: ["start_time", "end_time"],
 });
 
-export const update_availability_exceptionSchema = create_availability_exceptionSchema.partial();
+export const update_availability_exceptionSchema = create_availability_exceptionBaseSchema.partial();
 
 export type create_availability_exceptionDto = z.infer<typeof create_availability_exceptionSchema>;
 export type update_availability_exceptionDto = z.infer<typeof update_availability_exceptionSchema>;

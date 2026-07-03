@@ -1,4 +1,3 @@
-import { getbyid } from "../repositories/user.repository.js";
 import { notFound, forbidden } from "../utils/api_error.js";
 import {
   createAvailabilityException,
@@ -10,18 +9,10 @@ import {
 import type { create_availability_exceptionDto, update_availability_exceptionDto } from "../dtos/availability_exception_dto.js";
 
 export async function create_availability_exception(user_id: number, data: create_availability_exceptionDto) {
-  const user = await getbyid(user_id);
-  if (!user) {
-    throw notFound("user not found");
-  }
   return createAvailabilityException(user_id, data);
 }
 
 export async function find_availability_exception_byUser(user_id: number) {
-  const user = await getbyid(user_id);
-  if (!user) {
-    throw notFound("user not found");
-  }
   return findAvailabilityExceptionByUser(user_id);
 }
 
