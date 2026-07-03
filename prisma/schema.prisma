@@ -13,15 +13,18 @@ datasource db {
 }
 
 model user {
-  user_id          Int                 @id @default(autoincrement())
-  email            String              @unique
-  name             String
-  createAt         DateTime            @default(now())
-  updateAt         DateTime            @updatedAt
-  events           event[]
-  invitee_bookings booking[]           @relation("invitee_bookings")
-  availability     availability_pref[] @relation("availability_pref")
-  holidays         holiday[]           @relation("holidays")
+  user_id      Int                 @id @default(autoincrement())
+  email        String              @unique
+  name         String
+  slug         String              @unique
+  timezone     String              @default("UTC")
+  createAt     DateTime            @default(now())
+  updateAt     DateTime            @updatedAt
+  events       event[]
+  bookings     booking[]
+  availability availability_pref[]
+  holidays     holiday[]
+  slots        slot[]
 
   @@map("user") //In Prisma, @@map is used to map a Prisma model to an existing database table name
 }
@@ -32,7 +35,7 @@ model event {
   user_id          Int
   duration         Int
   title            String
-  slug             String    
+  slug             String
   description      String?
   isActive         Boolean   @default(true)
   locationType     String    @default("online")
@@ -42,63 +45,81 @@ model event {
   createAt         DateTime  @default(now())
   updateAt         DateTime  @updatedAt
   host             user      @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  bookings         booking[] @relation("event_bookings")
-  slots            slot[]    @relation("slots")
+  bookings         booking[]
+  slots            slot[]
 
+  @@unique([user_id, slug]) //In Prisma, @@unique is used to create a unique constraint on multiple fields in a model
   @@map("event")
-  @@unique([user_id,slug ]) //In Prisma, @@unique is used to create a unique constraint on multiple fields in a model
-}
-
-model booking {
-  booking_id Int      @id @default(autoincrement())
-  event_id   Int
-  invitee_id Int
-  status     String   @default("pending")
-  startTime  DateTime
-  endTime    DateTime
-  guestName  String
-  guestEmail String
-  createAt   DateTime @default(now())
-  updateAt   DateTime @updatedAt
-  invitee    user     @relation("invitee_bookings", fields: [invitee_id], references: [user_id], onDelete: Cascade)
-  event      event    @relation("event_bookings", fields: [event_id], references: [event_id], onDelete: Cascade)
-
-  @@map("booking")
 }
 
 model availability_pref {
   pref_id     Int      @id @default(autoincrement())
   user_id     Int
   day         String
-  start_time  DateTime
-  end_time    DateTime
+  start_time  String
+  end_time    String
+  timezone    String
   duration    Int
   isrecurring Boolean  @default(false)
   createAt    DateTime @default(now())
   updateAt    DateTime @updatedAt
-  user        user     @relation("availability_pref", fields: [user_id], references: [user_id], onDelete: Cascade)
+  user        user     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@index([user_id, day])
+  @@map("availability_pref")
 }
 
 model holiday {
   holiday_id Int      @id @default(autoincrement())
   user_id    Int
-  date       DateTime
-  start_time DateTime
-  end_time   DateTime
+  date       DateTime @db.Date
+  start_time String?
+  end_time   String?
+  timezone   String   @default("UTC")
   createAt   DateTime @default(now())
+  reason     String?
   updateAt   DateTime @updatedAt
-  user       user     @relation("holidays", fields: [user_id], references: [user_id], onDelete: Cascade)
+  user       user     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@index([user_id, date])
+  @@map("holiday")
 }
 
 model slot {
-  slot_id    Int      @id @default(autoincrement())
+  slot_id    Int       @id @default(autoincrement())
+  user_id    Int
   event_id   Int
-  day        String
-  date       DateTime
   start_time DateTime
   end_time   DateTime
-  is_booked  Boolean  @default(false)
-  createAt   DateTime @default(now())
-  updateAt   DateTime @updatedAt
-  event      event    @relation("slots", fields: [event_id], references: [event_id], onDelete: Cascade)
+  is_booked  Boolean   @default(false)
+  createAt   DateTime  @default(now())
+  updateAt   DateTime  @updatedAt
+  user       user      @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  event      event     @relation(fields: [event_id], references: [event_id], onDelete: Cascade)
+  bookings   booking[]
+
+  @@unique([event_id, start_time, end_time])
+  @@index([user_id, event_id, start_time])
+  @@index([event_id, start_time, is_booked])
+  @@map("slot")
+}
+
+model booking {
+  booking_id      Int       @id @default(autoincrement())
+  user_id         Int
+  event_id        Int
+  slot_id         Int
+  guestName       String
+  guestEmail      String
+  status          String    @default("pending")
+  meetingLink     String?
+  calendarEventId String?
+  cancelledAt     DateTime?
+  createAt        DateTime  @default(now())
+  updateAt        DateTime  @updatedAt
+  user            user      @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  event           event     @relation(fields: [event_id], references: [event_id], onDelete: Cascade)
+  slot            slot      @relation(fields: [slot_id], references: [slot_id], onDelete: Cascade)
+
+  @@map("booking")
 }

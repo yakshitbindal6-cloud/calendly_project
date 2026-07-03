@@ -66,3 +66,7 @@ export async function getevent_public(user_id:number,slug:string){
         }
     }
 }
+
+export async function get_event_byID(event_id:number){
+    return getEventById(event_id);
+}

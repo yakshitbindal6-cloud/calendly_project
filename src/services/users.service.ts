@@ -1,7 +1,6 @@
 import type { CreateUserDto, RemoveUserDto, UpdateUserDto } from '../dtos/user_dto.js';
-import type { availability_dto } from '../dtos/availability_dto.js';
-import {availability_pref, getall} from '../repositories/user.repository.js';
-import { getbyid,getbyemail,store_availability } from '../repositories/user.repository.js';
+import { getall } from '../repositories/user.repository.js';
+import { getbyid,getbyemail } from '../repositories/user.repository.js';
 import { update,delete_user,create_user } from '../repositories/user.repository.js';
 import { badRequest, notFound } from '../utils/api_error.js';
 export async function getAllUsers(){
@@ -41,18 +40,4 @@ export async function update_user(id:number,data:UpdateUserDto){
         }
     }
     return update(id, data);
-}
-export async function user_availability(id:number){
-    const user =await find_by_id(id)
-     if(!user) throw notFound("user not found")
-    return availability_pref(id)
-}
-export async function create_availability(data: availability_dto) {
-    const user = await find_by_id(data.user_id);
-
-    if (!user) {
-        throw notFound("user not found");
-    }
-
-    return store_availability(data);
 }

@@ -19,7 +19,6 @@ export function requireUserId(req: Request, res: Response, next: NextFunction) {
   if (!Number.isInteger(user_id) || user_id <= 0) {
     throw badRequest("Invalid user ID header");
   }
-
   req.user_id = user_id;
   next();
 }

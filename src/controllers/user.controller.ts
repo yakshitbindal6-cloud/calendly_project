@@ -1,5 +1,5 @@
 import type{ Request, Response } from "express";
-import { create_availability, find_by_id,getAllUsers, user_availability } from "../services/users.service.js";
+import { find_by_id,getAllUsers } from "../services/users.service.js";
 import { update_user,remove_user,add_user } from "../services/users.service.js";
 import { send_success } from "../utils/api_response.js";
 export async function findall_users(req:Request,res:Response){
@@ -24,13 +24,4 @@ export async function modify_user(req:Request,res:Response){
     const {id}=req.params;
     const user=await update_user(Number(id),req.body);
     send_success(res,user)
-}
-export async function find_availability(req:Request,res:Response){
-    const {id}=req.params;
-    const user_pref=await user_availability(Number(id))
-    send_success(res,user_pref)
-}
-export async function add_availability(req:Request,res:Response){
-    const data=await create_availability(req.body);
-    send_success(res,data,"availability succesfully created");
 }

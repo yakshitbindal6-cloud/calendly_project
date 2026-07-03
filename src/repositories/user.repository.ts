@@ -1,5 +1,4 @@
 import { prisma } from "../config/database.js";
-import type { availability_dto } from "../dtos/availability_dto.js";
 import type { CreateUserDto,RemoveUserDto, UpdateUserDto } from "../dtos/user_dto.js";
 import { notFound } from "../utils/api_error.js";
 
@@ -45,21 +44,4 @@ export async function update(id:number, data:UpdateUserDto){
     data
 })
     return user;
-}
-export async function availability_pref(id:number){
-    const available=await prisma.user.findUnique({
-        where:{
-            user_id: id
-        },
-        include:{
-            availability:true
-        }
-    })
-    return available;
-}
-export async function store_availability(data:availability_dto){
-    const stored=await prisma.availability_pref.create({
-        data
-    })
-    return stored
 }
