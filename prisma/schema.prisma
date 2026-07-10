@@ -86,7 +86,7 @@ model availability_exception {
 }
 
 model slot {
-  slot_id    Int       @id @default(autoincrement())
+  slot_id    String    @id @default(cuid())
   user_id    Int
   event_id   Int
   start_time DateTime
@@ -108,7 +108,7 @@ model booking {
   booking_id      Int       @id @default(autoincrement())
   user_id         Int
   event_id        Int
-  slot_id         Int
+  slot_id         String
   guestName       String
   guestEmail      String
   status          String    @default("pending")

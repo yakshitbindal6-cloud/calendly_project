@@ -45,3 +45,16 @@ export async function findAvailabilityExceptionById(availability_exception_id: n
   });
   return availabilityException;
 }
+export async function ExeptionsInRange(user_id:number,from:Date,to:Date){
+  const availabilityExceptions = await prisma.availability_exception.findMany({
+    where: {
+      user_id,
+      date: {
+        gte: from,
+        lte: to,
+      }
+    },
+    orderBy: [{ date: "asc" }],
+  });
+  return availabilityExceptions;
+}

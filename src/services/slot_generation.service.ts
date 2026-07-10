@@ -4,7 +4,6 @@ export interface Timewindow{
     start_time:DateTime,
     end_time:DateTime
 }
-
 export function parseTimeonDate(date:DateTime,time:string,timezone:string){
     const [hour,minute]=time.split(":").map(Number);
     return date.setZone(timezone).set({
@@ -63,8 +62,8 @@ export function subtractToWindow(windows:Timewindow[],block:Timewindow):Timewind
     return result.filter(w => w.end_time>=w.start_time); //drop zero length interval
 }
 export function overlap_booked(slot:Timewindow,booked:Timewindow[],bufferbeforeMin:number,bufferafterMin:number){
-    const padded_start=slot.start_time.minus(bufferbeforeMin);
-    const padded_end=slot.end_time.plus(bufferbeforeMin);
+   const padded_start = slot.start_time.minus({ minutes: bufferbeforeMin });
+    const padded_end = slot.end_time.plus({ minutes: bufferafterMin });
 
     return booked.some((b)=>{
         const interval=Interval.fromDateTimes(padded_start,padded_end);
@@ -73,7 +72,7 @@ export function overlap_booked(slot:Timewindow,booked:Timewindow[],bufferbeforeM
     })
 }
 export function apply_exceptions(date:DateTime,base_windows:Timewindow[],exceptions:Array<{
-    type:"BLOCK_FULL_DAY"| "BLOCK_PARTIAL"| "ADD_AVAILABLE_WINDOW",
+    type:string,
     start_time:string|null,
     end_time:string|null,
     timezone:string
@@ -99,4 +98,18 @@ export function apply_exceptions(date:DateTime,base_windows:Timewindow[],excepti
         }
     }
     return merge(windows);
+}
+// this function return the timewindow comatible with luxon
+export function windowFromAvail(date:DateTime,weekday:number,start_time:string,end_time:string,timezone:string):Timewindow[]{
+    const localdate=date.setZone(timezone).startOf('day');
+    const luxonWeekday = weekday === 0 ? 7 : weekday;
+    if(localdate.weekday!==luxonWeekday){
+        return [];
+    }
+    const start=parseTimeonDate(localdate,start_time,timezone);
+    const end=parseTimeonDate(localdate,end_time,timezone);
+    if(start.isValid && end.isValid && start<end){
+        return [{start_time:start,end_time:end}]
+    }
+    return [];
 }
