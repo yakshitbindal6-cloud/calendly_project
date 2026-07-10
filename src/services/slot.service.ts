@@ -62,12 +62,13 @@ export async function slotRegeneration(input:host_slotGeneration){
                 event.bufferbeforeTime,
                 event.bufferafterTime
             ).filter((slot)=>slot.start_time>=DateTime.utc()&&!overlap_booked(slot,bookedWindows,event.bufferbeforeTime,event.bufferafterTime));
-            for(const slot of slots_generated){
+            await Promise.all(
+                slots_generated.map((slot) => {
                 const start=slot.start_time.toUTC().toJSDate();
                 const end=slot.end_time.toUTC().toJSDate();
                 const key=`${event.event_id}|${start.toISOString()}|${end.toISOString()}`;
                 generatevalidkey.add(key);
-                await prisma.slot.upsert({
+                return prisma.slot.upsert({
                     where:{
                         event_id_start_time_end_time:{
                             event_id:event.event_id,
@@ -80,12 +81,15 @@ export async function slotRegeneration(input:host_slotGeneration){
                         event_id:event.event_id,
                         start_time:start,
                         end_time:end,
-                        is_booked:false,
+                        status:"available",
 
                     },
-                    update:{}
-                })
-            }
+                    update:{
+                        status:"available",
+                    }
+                });
+       })   
+    )
 }   
         const allslots=await prisma.slot.findMany({
             where:{
@@ -94,20 +98,20 @@ export async function slotRegeneration(input:host_slotGeneration){
                     gte:from.toJSDate(),
                     lte:to.toJSDate()
                 },
-                is_booked:false,
+                status:{in:["available","blocked"]},
             }
         })
-        for(const slot of allslots){
+        await Promise.all(allslots.map((slot)=>{
             const key=`${slot.event_id}|${slot.start_time.toISOString()}|${slot.end_time.toISOString()}`;
             if(!generatevalidkey.has(key)){
-                await prisma.slot.delete({
+                return prisma.slot.update({
                     where:{
                         slot_id:slot.slot_id
-                    }
+                    },
+                    data:{status:"blocked"}
                 })
             }
-        }
-
-
+            })
+        )
 }
 }

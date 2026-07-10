@@ -7,7 +7,7 @@ export async function findBookedSlotsByHostInRange(user_id:number,start_date:Dat
                 gte:start_date,
                 lte:end_date
             },
-            is_booked:true
+            status:"booked"
         },
     })
 }
