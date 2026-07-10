@@ -37,6 +37,7 @@ export async function slotRegeneration(input:host_slotGeneration){
     })
 
     for (const event of Host_events) {
+        const generatevalidkey=new Set<string>();
        for(let cursor=from;cursor<=to;cursor=cursor.plus({days:1})){
             const dateKey=cursor.toISODate();
             const dayExeptions=Exceptions.filter((ex)=>DateTime.fromJSDate(ex.date,{zone:'utc'}).toISODate()===dateKey);
@@ -65,9 +66,14 @@ export async function slotRegeneration(input:host_slotGeneration){
                 const start=slot.start_time.toUTC().toJSDate();
                 const end=slot.end_time.toUTC().toJSDate();
                 const key=`${event.event_id}|${start.toISOString()}|${end.toISOString()}`;
+                generatevalidkey.add(key);
                 await prisma.slot.upsert({
                     where:{
-                        slot_id:key
+                        event_id_start_time_end_time:{
+                            event_id:event.event_id,
+                            start_time:start,
+                            end_time:end
+                        }
                     },
                     create:{
                         user_id:input.host_id,
@@ -77,12 +83,30 @@ export async function slotRegeneration(input:host_slotGeneration){
                         is_booked:false,
 
                     },
-                    update:{
-                        is_booked:false,
+                    update:{}
+                })
+            }
+}   
+        const allslots=await prisma.slot.findMany({
+            where:{
+                event_id:event.event_id,
+                start_time:{
+                    gte:from.toJSDate(),
+                    lte:to.toJSDate()
+                },
+            }
+        })
+        for(const slot of allslots){
+            const key=`${slot.event_id}|${slot.start_time.toISOString()}|${slot.end_time.toISOString()}`;
+            if(!generatevalidkey.has(key)){
+                await prisma.slot.delete({
+                    where:{
+                        slot_id:slot.slot_id
                     }
                 })
             }
+        }
 
-}
+
 }
 }
