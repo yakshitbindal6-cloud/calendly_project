@@ -94,6 +94,7 @@ export async function slotRegeneration(input:host_slotGeneration){
                     gte:from.toJSDate(),
                     lte:to.toJSDate()
                 },
+                is_booked:false,
             }
         })
         for(const slot of allslots){
