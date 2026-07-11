@@ -1,11 +1,12 @@
-import { prisma } from "../config/database.js";
 import { DateTime } from "luxon";
 import { slot_Days } from "../config/env.js";
 import { find_active_availability } from "../repositories/availability.repository.js"; 
-import { findBookedSlotsByHostInRange } from "../repositories/slots.repository.js";
+import { findBookedSlotsByHostInRange, upsertSlot, findSlotsByEventInRange, updateSlotStatus } from "../repositories/slots.repository.js";
 import { ExeptionsInRange } from "../repositories/availability_exception.repository.js";
 import { apply_exceptions, overlap_booked, splitToSlots, windowFromAvail, type Timewindow } from "./slot_generation.service.js";
 import { getEventsByHost } from "../repositories/event.repository.js";
+import { getbyid } from "../repositories/user.repository.js";
+import { badRequest, notFound } from '../utils/api_error.js';
 export interface host_slotGeneration{
     host_id:number
     from ?:string,
@@ -13,12 +14,8 @@ export interface host_slotGeneration{
 }
 
 export async function slotRegeneration(input:host_slotGeneration){
-    const host=await prisma.user.findUnique({
-        where:{
-            user_id:input.host_id
-        }
-    })
-    if(!host)return;
+    const host = await getbyid(input.host_id);
+    if(!host)throw notFound("user not fount");
     const from=input.from? DateTime.fromISO(input.from,{zone:'utc'}).startOf('day'):DateTime.now().startOf('day');
     const to=input.to? DateTime.fromISO(input.to,{zone:'utc'}).endOf('day'):from.plus({days: slot_Days }).endOf('day');
 
@@ -63,55 +60,22 @@ export async function slotRegeneration(input:host_slotGeneration){
                 event.bufferafterTime
             ).filter((slot)=>slot.start_time>=DateTime.utc()&&!overlap_booked(slot,bookedWindows,event.bufferbeforeTime,event.bufferafterTime));
             await Promise.all(
-                slots_generated.map((slot) => {
-                const start=slot.start_time.toUTC().toJSDate();
-                const end=slot.end_time.toUTC().toJSDate();
-                const key=`${event.event_id}|${start.toISOString()}|${end.toISOString()}`;
-                generatevalidkey.add(key);
-                return prisma.slot.upsert({
-                    where:{
-                        event_id_start_time_end_time:{
-                            event_id:event.event_id,
-                            start_time:start,
-                            end_time:end
-                        }
-                    },
-                    create:{
-                        user_id:input.host_id,
-                        event_id:event.event_id,
-                        start_time:start,
-                        end_time:end,
-                        status:"available",
-
-                    },
-                    update:{
-                        status:"available",
-                    }
-                });
-       })   
+                        slots_generated.map((slot) => {
+                        const start=slot.start_time.toUTC().toJSDate();
+                        const end=slot.end_time.toUTC().toJSDate();
+                        const key=`${event.event_id}|${start.toISOString()}|${end.toISOString()}`;
+                        generatevalidkey.add(key);
+                        return upsertSlot(input.host_id,event.event_id,start,end);
+               })   
     )
 }   
-        const allslots=await prisma.slot.findMany({
-            where:{
-                event_id:event.event_id,
-                start_time:{
-                    gte:from.toJSDate(),
-                    lte:to.toJSDate()
-                },
-                status:{in:["available","blocked"]},
-            }
-        })
-        await Promise.all(allslots.map((slot)=>{
-            const key=`${slot.event_id}|${slot.start_time.toISOString()}|${slot.end_time.toISOString()}`;
-            if(!generatevalidkey.has(key)){
-                return prisma.slot.update({
-                    where:{
-                        slot_id:slot.slot_id
-                    },
-                    data:{status:"blocked"}
-                })
-            }
-            })
-        )
+                const allslots = await findSlotsByEventInRange(event.event_id, from.toJSDate(), to.toJSDate(), ["available","blocked"]);
+                await Promise.all(allslots.map((slot)=>{
+                    const key=`${slot.event_id}|${slot.start_time.toISOString()}|${slot.end_time.toISOString()}`;
+                    if(!generatevalidkey.has(key)){
+                        return updateSlotStatus(slot.slot_id,"blocked")
+                    }
+                    })
+                )
 }
 }

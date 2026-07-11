@@ -4,7 +4,7 @@ import { update_user,remove_user,add_user } from "../services/users.service.js";
 import { send_success } from "../utils/api_response.js";
 export async function findall_users(req:Request,res:Response){
     const users=await getAllUsers();
-    res.json(users);
+    send_success(res,users)
 }
 export async function find_user(req:Request,res:Response){
     const {id}=req.params;
