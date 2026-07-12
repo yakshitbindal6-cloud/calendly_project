@@ -7,13 +7,11 @@ export async function getall(){
     return user;
 }
 export async function getbySlug(slug:string){
-    const user= await prisma.user.findUnique({
+    return await prisma.user.findUnique({
         where:{
             slug
         }
     })
-    if (!user) throw notFound("User not found");
-    return user;
 }
 export async function getbyid(id:number){
     const user=await prisma.user.findUnique({

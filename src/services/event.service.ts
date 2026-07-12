@@ -3,6 +3,7 @@ import { createEvent, getEventsByHost, SlugExistsforHost, getEventById, removeEv
 import type { create_eventDto, update_eventDto } from '../dtos/event_dto.js';
 import { getbyid } from '../repositories/user.repository.js';
 import { conflict, notFound,forbidden } from '../utils/api_error.js';
+import { StartregenerateHostSlotWorkflow } from "../temporal/client.js";
 export async function get_user_events(user_id:number){
     const user=await getbyid(user_id);
     if (!user) {
@@ -17,7 +18,9 @@ export async function create_event(user_id:number,data:create_eventDto){
     }
     const isSlug_taken=await SlugExistsforHost(user_id,slug_pass);
     if(isSlug_taken)throw conflict("event with this slug already exists, please use diffrent slug");
-    return createEvent(user_id,{...data,slug:slug_pass});
+    const event= await createEvent(user_id,{...data,slug:slug_pass});
+    await StartregenerateHostSlotWorkflow({host_id:user_id});
+    return event;
 }
 export async function remove_event(user_id:number,event_id:number){
     const event=await getEventById(event_id);

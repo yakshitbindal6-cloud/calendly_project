@@ -2,21 +2,27 @@ import { prisma } from "../config/database.js";
 import type { create_availability_exceptionDto, update_availability_exceptionDto } from "../dtos/availability_exception_dto.js";
 
 export async function createAvailabilityException(user_id: number, data: create_availability_exceptionDto) {
+  const { date, ...rest } = data;
   const availabilityException = await prisma.availability_exception.create({
     data: {
       user_id,
-      ...data,
+      ...rest,
+      date: new Date(`${date}T00:00:00.000Z`),
     },
   });
   return availabilityException;
 }
 
 export async function updateAvailabilityException(availability_exception_id: number, data: update_availability_exceptionDto) {
+   const { date, ...rest } = data;
   const availabilityException = await prisma.availability_exception.update({
     where: {
       availability_exception_id,
     },
-    data,
+    data: {
+      ...rest,
+      ...(date !== undefined && { date: new Date(`${date}T00:00:00.000Z`) }),
+    },
   });
   return availabilityException;
 }

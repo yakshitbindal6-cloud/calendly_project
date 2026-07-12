@@ -6,3 +6,4 @@ export const slot_Days=Number(process.env.slot_generationDays)||30;
 export const Temporal_Address=process.env.Temporal_Address||'http://localhost:7233';
 export const Temporal_namespace=process.env.Temporal_namespace||'default';
 export const Temporal_taskqueue=process.env.Temporal_taskqueue||'calendly_task';
+export const Temporal_enabled='true';

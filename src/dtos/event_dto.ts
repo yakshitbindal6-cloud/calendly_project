@@ -7,7 +7,7 @@ export const create_eventScema=z.object({
         .max(150,"slug must be less than 150 characters")
         .regex(/^[a-z0-9-]+$/, "slug can only contain lowercase letters, numbers, and hyphens").optional(),
     description:z.string().max(1000).optional(),
-    isActive:z.boolean(),
+    isActive:z.boolean().default(true),
     locationType:z.enum(["online","in-person"]).default("online"),
     locationValue:z.string().optional(),
     bufferbeforeTime:z.number().min(0).max(120).default(0),

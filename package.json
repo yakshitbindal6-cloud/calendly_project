@@ -8,6 +8,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --watch src --ext ts --exec 'tsx src/server.ts'",
+    "dev:worker": "nodemon --watch src --ext ts --exec 'tsx src/temporal/workers.ts'",
     "prisma:format": "npx prisma format",
     "prisma:migrate": "npx prisma migrate dev",
     "prisma:generate": "npx prisma generate",
