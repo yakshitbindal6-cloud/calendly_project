@@ -30,7 +30,9 @@ export async function remove_event(user_id:number,event_id:number){
     if(event.user_id!==user_id){
         throw forbidden("you are not authorized to delete a event");
     }
-    return removeEvent(event_id)
+    const result = await removeEvent(event_id);
+    await StartregenerateHostSlotWorkflow({host_id:user_id});
+    return result;
 }
 export async function update_event(user_id:number,event_id:number,data:update_eventDto){
     const event=await getEventById(event_id);
@@ -44,7 +46,9 @@ export async function update_event(user_id:number,event_id:number,data:update_ev
         const isSlug_taken=await SlugExistsforHost(user_id,data.slug);
         if(isSlug_taken)throw conflict("event with this slug already exists, please use diffrent slug");
     }
-    return updateEvent(event_id,data);
+    const update_event=await updateEvent(event_id,data);
+    await StartregenerateHostSlotWorkflow({host_id:user_id});
+    return update_event;
 }
 export async function getevent_public(user_id:number,slug:string){
     const event=await findActiveHostAndSlug(user_id,slug);

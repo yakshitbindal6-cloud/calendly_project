@@ -16,8 +16,8 @@ export interface host_slotGeneration{
 export async function slotRegeneration(input:host_slotGeneration){
     const host = await getbyid(input.host_id);
     if(!host)throw notFound("user not fount");
-    const from=input.from? DateTime.fromISO(input.from,{zone:'utc'}).startOf('day'):DateTime.now().startOf('day');
-    const to=input.to? DateTime.fromISO(input.to,{zone:'utc'}).endOf('day'):from.plus({days: slot_Days }).endOf('day');
+    const from=input.from? DateTime.fromISO(input.from,{zone:'utc'}).startOf('day'):DateTime.now().startOf('day').toUTC();
+    const to=input.to? DateTime.fromISO(input.to,{zone:'utc'}).endOf('day'):from.plus({days: slot_Days }).endOf('day').toUTC();
 
     const [ActiveAvailable_Host,Host_events,BookedSlots,Exceptions]=await Promise.all([
         find_active_availability(input.host_id),
