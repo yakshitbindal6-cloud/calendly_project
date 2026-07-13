@@ -119,3 +119,16 @@ export async function findHostBookings(
     },
   });
 }
+
+export async function findBookingById(booking_id: number) {
+  return prisma.booking.findUnique({
+    where: {
+      booking_id,
+    },
+    include: {
+      slot: true,
+      event: true,
+      user: true,
+    },
+  });
+}

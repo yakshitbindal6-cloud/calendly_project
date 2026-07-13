@@ -29,3 +29,10 @@ async function startWorkflow(workflowName: string,workflowId: string,args:unknow
             [input],
         );
 }
+export async function StartBookingNotificationWorkflow(booking_id:number){
+    return startWorkflow(
+        "bookingNotificationWorkflow",
+        `booking-notification-${booking_id}-${Date.now()}`,
+        [booking_id],
+    );
+}
