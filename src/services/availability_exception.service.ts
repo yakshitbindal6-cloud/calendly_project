@@ -7,9 +7,12 @@ import {
   updateAvailabilityException,
 } from "../repositories/availability_exception.repository.js";
 import type { create_availability_exceptionDto, update_availability_exceptionDto } from "../dtos/availability_exception_dto.js";
+import { StartregenerateHostSlotWorkflow } from "../temporal/client.js";
 
 export async function create_availability_exception(user_id: number, data: create_availability_exceptionDto) {
-  return createAvailabilityException(user_id, data);
+  const availabilityException = await createAvailabilityException(user_id, data);
+  await StartregenerateHostSlotWorkflow({ host_id: user_id });
+  return availabilityException;
 }
 
 export async function find_availability_exception_byUser(user_id: number) {
@@ -35,7 +38,9 @@ export async function update_availability_exception(user_id: number, availabilit
   if (availabilityException.user_id !== user_id) {
     throw forbidden("you are not authorized to update this availability exception");
   }
-  return updateAvailabilityException(availability_exception_id, data);
+  const updatedAvailabilityException = await updateAvailabilityException(availability_exception_id, data);
+  await StartregenerateHostSlotWorkflow({ host_id: user_id });
+  return updatedAvailabilityException;
 }
 
 export async function remove_availability_exception(user_id: number, availability_exception_id: number) {
@@ -46,5 +51,7 @@ export async function remove_availability_exception(user_id: number, availabilit
   if (availabilityException.user_id !== user_id) {
     throw forbidden("you are not authorized to delete this availability exception");
   }
-  return removeAvailabilityException(availability_exception_id);
+  const deletedAvailabilityException = await removeAvailabilityException(availability_exception_id);
+  await StartregenerateHostSlotWorkflow({ host_id: user_id });
+  return deletedAvailabilityException;
 }

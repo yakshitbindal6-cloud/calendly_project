@@ -1,9 +1,12 @@
 import { notFound, forbidden } from "../utils/api_error.js";
 import { create, update, remove, find_availability_byUser, find_active_availability, find_availability_ById } from "../repositories/availability.repository.js";
 import type { CreateAvailabilityDto, UpdateAvailabilityDto } from "../dtos/availability_dto.js";
+import { StartregenerateHostSlotWorkflow } from "../temporal/client.js";
 
 export async function create_availability(user_id: number, data: CreateAvailabilityDto) {
-  return create(user_id, data);
+  const availability = await create(user_id, data);
+  await StartregenerateHostSlotWorkflow({ host_id: user_id });
+  return availability;
 }
 
 export async function get_user_availability(user_id: number) {
@@ -33,7 +36,9 @@ export async function update_availability(user_id: number, pref_id: number, data
   if (availability.user_id !== user_id) {
     throw forbidden("you are not authorized to update this availability preference");
   }
-  return update(pref_id, data);
+  const updatedAvailability = await update(pref_id, data);
+  await StartregenerateHostSlotWorkflow({ host_id: user_id });
+  return updatedAvailability;
 }
 
 export async function remove_availability(user_id: number, pref_id: number) {
@@ -44,5 +49,7 @@ export async function remove_availability(user_id: number, pref_id: number) {
   if (availability.user_id !== user_id) {
     throw forbidden("you are not authorized to delete this availability preference");
   }
-  return remove(pref_id);
+  const deletedAvailability = await remove(pref_id);
+  await StartregenerateHostSlotWorkflow({ host_id: user_id });
+  return deletedAvailability;
 }
