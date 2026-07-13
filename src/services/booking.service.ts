@@ -1,11 +1,12 @@
-import type { createBooking_dto } from "../dtos/booking_dto.js";
+import type { createBooking_dto, listHostBookingQuery } from "../dtos/booking_dto.js";
 import {
     createBookingWithDetails,
     findSlotById,
     lockSlotRowForUpdate,
     markSlotBooked,
     markSlotBookedIfAvailable,
-    runBookingTransaction
+    runBookingTransaction,
+    findHostBookings
 } from "../repositories/booking.repository.js";
 import { badRequest, notFound } from "../utils/api_error.js";
 import { slotRegeneration } from "./slot.service.js";
@@ -73,4 +74,25 @@ export async function create_booking_pessimistic(user_id:number,data:createBooki
         end_time:booking.slot.end_time.toISOString(),
     }
     }
+}
+
+export async function list_host_bookings(host_id: number, query: listHostBookingQuery) {
+  const filters = {
+    status: query.status,
+    from: query.from ? new Date(query.from) : undefined,
+    to: query.to ? new Date(query.to) : undefined,
+  };
+
+  const bookings = await findHostBookings(host_id, filters);
+
+  return bookings.map((booking) => ({
+    id: booking.booking_id,
+    guestName: booking.guestName,
+    guestEmail: booking.guestEmail,
+    status: booking.status,
+    startTime: booking.slot.start_time.toISOString(),
+    endTime: booking.slot.end_time.toISOString(),
+    eventTitle: booking.event.title,
+    createdAt: booking.createAt.toISOString(),
+  }));
 }

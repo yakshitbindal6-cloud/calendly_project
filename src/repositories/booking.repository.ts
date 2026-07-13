@@ -81,3 +81,41 @@ export async function createBookingWithDetails(
     },
   });
 }
+
+export async function findHostBookings(
+  host_id: number,
+  filters?: {
+    status?: string;
+    from?: Date;
+    to?: Date;
+  }
+) {
+  return prisma.booking.findMany({
+    where:{
+      user_id: host_id,
+      slot:{
+        start_time: {
+          gte: filters?.from,
+          lte: filters?.to,
+        }
+      },
+      status: filters?.status
+    },
+    include: {
+      slot: true,
+      event:{
+        select:{
+          event_id:true,
+          title:true,
+          slug:true
+        }
+      },
+      user: true,
+    },
+    orderBy: {
+      slot: {
+        start_time: "desc",
+      },
+    },
+  });
+}

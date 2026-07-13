@@ -29,10 +29,6 @@ export async function getEventsByHost(user_id:number){
         where: {
             user_id
         },
-        include: {
-            slots: true,
-            bookings: true
-        }
     })
     return events;
 }
@@ -43,10 +39,6 @@ export async function findActiveHostAndSlug(user_id:number,slug:string){
             user_id,
             slug
         },
-        include: {
-            slots: true,
-            bookings: true
-        }
     })
     return event;
 }
@@ -55,10 +47,6 @@ export async function getEventById(event_id:number){
         where:{
             event_id
         },
-        include: {
-            slots:true,
-            bookings: true
-        }
     })
     if(!event)throw notFound("event not found");
     return event;
