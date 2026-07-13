@@ -5,11 +5,11 @@ import {
   findAvailabilityExceptionById,
   removeAvailabilityException,
   updateAvailabilityException,
-} from "../repositories/availability_exception.repository.js";
+}from "../repositories/availability_exception.repository.js";
 import type { create_availability_exceptionDto, update_availability_exceptionDto } from "../dtos/availability_exception_dto.js";
 import { StartregenerateHostSlotWorkflow } from "../temporal/client.js";
 
-export async function create_availability_exception(user_id: number, data: create_availability_exceptionDto) {
+export async function create_availability_exception(user_id: number, data: create_availability_exceptionDto){
   const availabilityException = await createAvailabilityException(user_id, data);
   await StartregenerateHostSlotWorkflow({ host_id: user_id });
   return availabilityException;

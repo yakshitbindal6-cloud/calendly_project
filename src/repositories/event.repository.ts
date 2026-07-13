@@ -56,7 +56,7 @@ export async function getEventById(event_id:number){
             event_id
         },
         include: {
-            slots: true,
+            slots:true,
             bookings: true
         }
     })
