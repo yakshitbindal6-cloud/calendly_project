@@ -1,14 +1,16 @@
-import { prisma } from "../config/database.js";
 import type { createBooking_dto } from "../dtos/booking_dto.js";
+import {
+    createBookingWithDetails,
+    findSlotById,
+    lockSlotRowForUpdate,
+    markSlotBooked,
+    markSlotBookedIfAvailable,
+    runBookingTransaction
+} from "../repositories/booking.repository.js";
 import { badRequest, notFound } from "../utils/api_error.js";
 export async function create_booking_optimistic(user_id:number,data:createBooking_dto){
-   const booking =await prisma.$transaction(
-    async (tx) => {
-        const slot=await prisma.slot.findUnique({
-            where:{
-                slot_id:data.slot_id
-            }
-        })
+   const booking =await runBookingTransaction(async (tx) => {
+        const slot=await findSlotById(tx,data.slot_id)
         if(!slot){
             throw notFound("slot not found");
         }
@@ -18,34 +20,12 @@ export async function create_booking_optimistic(user_id:number,data:createBookin
         if(slot.start_time<new Date()){
             throw badRequest("slot is in past, cannot be booked");
         }
-        const update=await tx.slot.updateMany({
-            where:{
-                slot_id:data.slot_id,
-                status:"available"
-            },
-            data:{
-                status:"booked"
-            }
-        })
+        const update=await markSlotBookedIfAvailable(tx,data.slot_id)
         if(update.count!==1){
             throw badRequest("slot is not available for booking");
         }
-        return tx.booking.create({
-            data:{
-                user_id,
-                event_id:slot.event_id,
-                slot_id:data.slot_id,
-                guestName:data.guestName,
-                guestEmail:data.guestEmail,
-                status:"Confirmed"
-            },
-            include:{
-                slot:true,
-                event:true
-            }
-        })
-    }
-)
+        return createBookingWithDetails(tx,user_id,slot.event_id,data)
+    })
     return {
         booking:{
         id:booking.booking_id,
@@ -57,22 +37,13 @@ export async function create_booking_optimistic(user_id:number,data:createBookin
 }
 
 export async function create_booking_pessimistic(user_id:number,data:createBooking_dto){
-   const booking = await prisma.$transaction(async (tx) => {
-        const lockedSlotRow = await tx.$queryRaw<{slot_id:string;}[]>`
-            SELECT slot_id
-            FROM "slot"
-            WHERE slot_id = ${data.slot_id}
-            FOR UPDATE
-        `;
+   const booking = await runBookingTransaction(async (tx) => {
+        const lockedSlotRow = await lockSlotRowForUpdate(tx,data.slot_id)
 
         if(lockedSlotRow.length===0){
             throw notFound('slot not found');
         }
-        const slot=await prisma.slot.findUnique({
-            where:{
-                slot_id:data.slot_id
-            }
-        })
+        const slot=await findSlotById(tx,data.slot_id)
         if(!slot){
             throw notFound("slot not found");
         }
@@ -83,29 +54,9 @@ export async function create_booking_pessimistic(user_id:number,data:createBooki
             throw badRequest("slot is in past, cannot be booked");
         }
 
-        await tx.slot.update({
-            where:{
-                slot_id:data.slot_id
-            },
-            data:{
-                status:"booked"
-            }
-        });
+        await markSlotBooked(tx,data.slot_id);
 
-        return tx.booking.create({
-            data:{
-                user_id,
-                event_id:slot.event_id,
-                slot_id:data.slot_id,
-                guestName:data.guestName,
-                guestEmail:data.guestEmail,
-                status:"Confirmed"
-            },
-            include:{
-                slot:true,
-                event:true
-            }
-        })
+        return createBookingWithDetails(tx,user_id,slot.event_id,data)
    });
 
     return {
