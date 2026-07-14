@@ -132,3 +132,31 @@ export async function findBookingById(booking_id: number) {
     },
   });
 }
+export async function bookingCancel(booking_id:number){
+  return prisma.$transaction(async (tx) => {
+    const booking = await tx.booking.update({
+      where: {
+        booking_id: booking_id,
+      },
+      data: {
+        status: "Cancelled",
+      },
+      include:{
+        slot:true,
+        event:true,
+        user:true
+      }
+    });
+
+    await tx.slot.update({
+      where: {
+        slot_id: booking.slot_id,
+      },
+      data: {
+        status: "available",
+      },
+    });
+
+    return booking;
+  });
+}

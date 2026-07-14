@@ -6,9 +6,11 @@ import {
     markSlotBooked,
     markSlotBookedIfAvailable,
     runBookingTransaction,
-    findHostBookings
+    findHostBookings,
+    bookingCancel,
+    findBookingById
 } from "../repositories/booking.repository.js";
-import { StartBookingNotificationWorkflow } from "../temporal/client.js";
+import { StartBookingCancellationNotificationWorkflow, StartBookingNotificationWorkflow } from "../temporal/client.js";
 import { badRequest, notFound } from "../utils/api_error.js";
 import { slotRegeneration } from "./slot.service.js";
 async function triggerSlotregen(host_id:number,slot_start:Date){
@@ -98,4 +100,33 @@ export async function list_host_bookings(host_id: number, query: listHostBooking
     eventTitle: booking.event.title,
     createdAt: booking.createAt.toISOString(),
   }));
+}
+export async function Cancel_booking(host_id:number,booking_id:number){
+    const booking = await findBookingById(booking_id);
+    if(!booking){
+        throw notFound("booking not found");
+    }
+    if(booking.status==="Cancelled"){
+        throw badRequest("booking is already cancelled");
+    }
+    if(booking.slot.start_time<new Date(Date.now()+24*60*60*1000)){
+        throw badRequest("booking cannot be cancelled within 24 hours of the slot start time");
+    }
+    if(booking.user_id!==host_id){
+        throw badRequest("you are not authorized to cancel this booking");
+    }
+    const updatedBooking = await bookingCancel(booking_id);
+    await triggerSlotregen(host_id,updatedBooking.slot.start_time);
+    await StartBookingCancellationNotificationWorkflow(updatedBooking.booking_id);
+    return{
+        booking:{
+            booking_id:updatedBooking.booking_id,
+            slot_id:updatedBooking.slot_id,
+            status:updatedBooking.status,
+            start_time:updatedBooking.slot.start_time.toISOString(),
+            end_time:updatedBooking.slot.end_time.toISOString(),
+        }
+    }
+
+
 }

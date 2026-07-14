@@ -21,7 +21,7 @@ export async function slotRegeneration(input:host_slotGeneration){
 
     const [ActiveAvailable_Host,Host_events,BookedSlots,Exceptions]=await Promise.all([
         find_active_availability(input.host_id),
-       getEventsByHost(input.host_id),
+        getEventsByHost(input.host_id),
         findBookedSlotsByHostInRange(input.host_id,from.toJSDate(),to.toJSDate()),
         ExeptionsInRange(input.host_id,from.toJSDate(),to.toJSDate())
     ])

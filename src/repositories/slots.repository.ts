@@ -46,8 +46,15 @@ export async function findSlotsByEventInRange(event_id:number,from:Date,to:Date,
         }
     })
 }
-
 export async function updateSlotStatus(slot_id:string,status:string){
+    return prisma.slot.update({
+        where:{
+            slot_id
+        },
+        data:{status}
+    })
+}
+export async function update_booked_slot_status(slot_id:string,status:string){
     return prisma.slot.update({
         where:{
             slot_id

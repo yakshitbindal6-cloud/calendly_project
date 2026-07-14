@@ -36,3 +36,10 @@ export async function StartBookingNotificationWorkflow(booking_id:number){
         [booking_id],
     );
 }
+export async function StartBookingCancellationNotificationWorkflow(booking_id:number){
+    return startWorkflow(
+        "bookingCancellationNotificationWorkflow",
+        `booking-cancellation-notification-${booking_id}-${Date.now()}`,
+        [booking_id],
+    );
+}
