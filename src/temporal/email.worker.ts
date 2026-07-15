@@ -12,7 +12,7 @@ async function runEmailWorker() {
         namespace: Temporal_namespace,
         taskQueue: Temporal_email_taskqueue,
         activities: emailActivities,
-        workflowsPath: fileURLToPath(new URL("./workflows/index.ts", import.meta.url))
+        workflowsPath: fileURLToPath(new URL("./workflows/email.workflows.ts", import.meta.url))
     });
     await worker.run();
 }

@@ -12,7 +12,7 @@ async function runSlotWorker() {
         namespace: Temporal_namespace,
         taskQueue: Temporal_slot_taskqueue,
         activities: slotActivities,
-        workflowsPath: fileURLToPath(new URL("./workflows/index.ts", import.meta.url))
+        workflowsPath: fileURLToPath(new URL("./workflows/slot.workflows.ts", import.meta.url))
     });
     await worker.run();
 }
