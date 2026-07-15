@@ -1,11 +1,11 @@
 import { proxyActivities} from "@temporalio/workflow";
-import type * as activities from "../activities/index.js";
+import type * as emailActivities from "../activities/email.activities.js";
 
-const { SendBookingConfirmationEmailActivity } = proxyActivities<typeof activities>({
+const { SendBookingConfirmationEmailActivity } = proxyActivities<typeof emailActivities>({
     retry: {maximumAttempts: 3},
     startToCloseTimeout: "10 minute",
 });
-const { SendBookingCancellationEmailActivity } = proxyActivities<typeof activities>({
+const { SendBookingCancellationEmailActivity } = proxyActivities<typeof emailActivities>({
     retry: {maximumAttempts: 3},
     startToCloseTimeout: "10 minute",
 });
