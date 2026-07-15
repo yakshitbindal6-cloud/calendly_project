@@ -1,5 +1,5 @@
 import {Connection,Client} from"@temporalio/client";
-import {Temporal_Address,Temporal_namespace,Temporal_taskqueue} from"./env.js";
+import {Temporal_Address,Temporal_namespace,Temporal_slot_taskqueue,Temporal_email_taskqueue} from"./env.js";
 let client: Client | null = null;
 
 export async function getTemporalClient(){
