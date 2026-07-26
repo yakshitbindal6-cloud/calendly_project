@@ -1,9 +1,8 @@
 import nodemailer from "nodemailer";
 import { Email_From, SMTP_Host,SMTP_Password,SMTP_Port, SMTP_User } from "./env.js";
 let transporter: nodemailer.Transporter|null = null;
-
 export function getTransporter() {
-    if(transporter) {
+    if(transporter){
         return transporter;
     }
     transporter = nodemailer.createTransport({

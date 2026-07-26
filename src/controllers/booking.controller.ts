@@ -5,7 +5,7 @@ import type { listHostBookingQuery } from "../dtos/booking_dto.js";
 
 export async function create_booking(req:Request,res:Response){
     const user_id=req.user_id
-    const data= await create_booking_pessimistic(user_id,req.body)
+    const data= await create_booking_optimistic(user_id,req.body)
     send_success(res,data,"booking created successfully");
 }
 

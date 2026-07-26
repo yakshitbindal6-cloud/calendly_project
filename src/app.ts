@@ -7,6 +7,7 @@ import { publicEventRouter } from './routers/public_event.router.js';
 import { availabilityExceptionRouter } from './routers/availability_exception.router.js';
 import { availabilityRouter } from './routers/availability.router.js';
 import { bookingRouter } from './routers/booking.router.js';
+import { google_router } from './routers/google.router.js';
 const app = express();
 app.use(express.json());
 app.use('/api/users',userRouter);
@@ -15,6 +16,7 @@ app.use('/api/availability-exceptions', availabilityExceptionRouter);
 app.use('/api/availability', availabilityRouter);
 app.use('/api/bookings', bookingRouter);
 app.use('/api/public',publicEventRouter);
+app.use('/api/google',google_router);
 app.use(rout_notfound)
 app.use(errorhandler)
 export {app};

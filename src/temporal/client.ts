@@ -1,4 +1,4 @@
-import { Temporal_enabled, Temporal_slot_taskqueue, Temporal_email_taskqueue } from "../config/env.js";
+import { Temporal_enabled, Temporal_slot_taskqueue, Temporal_email_taskqueue,Temporal_GoogleCalendar_taskqueue } from "../config/env.js";
 import { getTemporalClient } from "../config/temporal.js";
 import type { host_slotGeneration } from "../services/slot.service.js";
 
@@ -49,4 +49,21 @@ export async function StartBookingCancellationNotificationWorkflow(booking_id: n
         [booking_id],
         Temporal_email_taskqueue,  // <-- email queue
     );
+}
+export async function StartCreateGoogleCalenderWorkflow(booking_id:number){
+    return startWorkflow(
+        "CreateGoogleCalenderWorkflow",
+        `Create-Google-Calender-Event-${booking_id}-${Date.now()}`,
+        [booking_id],
+        Temporal_GoogleCalendar_taskqueue 
+    )
+}
+
+export async function StartDeleteGoogleCalenderWorkflow(booking_id:number){
+    return startWorkflow(
+        "DeleteGoogleCalendarEventWorkflow",
+        `Delete-Google-Calender-Event-${booking_id}-${Date.now()}`,
+        [booking_id],
+        Temporal_GoogleCalendar_taskqueue
+    )
 }

@@ -16,3 +16,6 @@ export const Email_From=process.env.Email_From||'Calendly <no-reply@calendly.com
 export const Google_Client_Id=process.env.Google_Client_Id||'';
 export const Google_Client_Secret=process.env.Google_Client_Secret||'';
 export const Google_Redirect_URI=process.env.Google_Redirect_URI||'http://localhost:3001/api/google/callback';
+export const Google_Refresh_Token=process.env.Google_RefreshToken||'';
+export const Google_Calendar_id=process.env.Google_Calender_id||'primary';
+export const Temporal_GoogleCalendar_taskqueue=process.env.Temporal_GoogleCalendar_taskqueue||'google_calender_queue';

@@ -10,10 +10,12 @@
     "dev": "nodemon --watch src --ext ts --exec 'tsx src/server.ts'",
     "dev:worker:slot":  "nodemon --watch src --ext ts --exec 'tsx src/temporal/slot.worker.ts'",
     "dev:worker:email": "nodemon --watch src --ext ts --exec 'tsx src/temporal/email.worker.ts'",
+    "dev:worker:google": "nodemon --watch src --ext ts --exec 'tsx src/temporal/google_calendar.worker.ts'",
     "prisma:format": "npx prisma format",
     "prisma:migrate": "npx prisma migrate dev",
     "prisma:generate": "npx prisma generate",
-    "prisma:all": "npx prisma format && npx prisma migrate dev && npx prisma generate"
+    "prisma:all": "npx prisma format && npx prisma migrate dev && npx prisma generate",
+    "prisma:setup":"tsx src/utils/google.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",

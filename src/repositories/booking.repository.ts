@@ -160,3 +160,23 @@ export async function bookingCancel(booking_id:number){
     return booking;
   });
 }
+
+export async function updateBookingCalendarDetails(booking_id:number,data:{meetingLink :string,calendarEventId: string}){
+  return await prisma.booking.update({
+      where:{booking_id},
+      data:{
+        meetingLink:data.meetingLink,
+        calendarEventId:data.calendarEventId
+      }
+      })
+}
+
+export async function clearBookingCalendarDetails(booking_id:number){
+  return await prisma.booking.update({
+    where:{ booking_id },
+    data: {
+      meetingLink: null,
+      calendarEventId: null,
+    }
+  })
+}
