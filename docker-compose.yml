@@ -45,4 +45,9 @@ services:
     ports:
       - "8025:8025" # Web UI
       - "1025:1025" # SMTP server
+  redis:
+    image: redis:7.0.11-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
     

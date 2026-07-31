@@ -10,13 +10,12 @@ import {
     bookingCancel,
     findBookingById
 } from "../repositories/booking.repository.js";
-import { StartBookingCancellationNotificationWorkflow, StartBookingNotificationWorkflow, StartCreateGoogleCalenderWorkflow } from "../temporal/client.js";
-import { StartDeleteGoogleCalenderWorkflow } from "../temporal/client.js";
+import { StartBookingCancellationNotificationWorkflow, StartBookingNotificationWorkflow, StartCreateGoogleCalenderWorkflow, StartDeleteGoogleCalenderWorkflow, StartregenerateHostSlotWorkflow } from "../temporal/client.js";
 import { badRequest, notFound } from "../utils/api_error.js";
 import { slotRegeneration } from "./slot.service.js";
 async function triggerSlotregen(host_id:number,slot_start:Date){
     const start_time=slot_start.toISOString().split("T")[0];
-        await slotRegeneration({host_id,from:start_time,to:start_time });
+        await StartregenerateHostSlotWorkflow({host_id,from:start_time,to:start_time});
 }
 export async function create_booking_optimistic(user_id:number,data:createBooking_dto){
    const booking =await runBookingTransaction(async (tx) => {
@@ -38,7 +37,7 @@ export async function create_booking_optimistic(user_id:number,data:createBookin
     })
     await triggerSlotregen(user_id,booking.slot.start_time);
     await StartBookingNotificationWorkflow(booking.booking_id);
-    await StartCreateGoogleCalenderWorkflow(booking.booking_id);
+    await StartCreateGoogleCalenderWorkflow(booking.booking_id); 
     return {
         booking:{
         id:booking.booking_id,

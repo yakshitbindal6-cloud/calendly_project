@@ -8,7 +8,6 @@ export async function create_booking(req:Request,res:Response){
     const data= await create_booking_optimistic(user_id,req.body)
     send_success(res,data,"booking created successfully");
 }
-
 export async function list_host_bookings_controller(req:Request,res:Response){
     const host_id=req.user_id
     const query = req.query as unknown as listHostBookingQuery

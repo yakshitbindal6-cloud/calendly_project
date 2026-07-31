@@ -19,3 +19,5 @@ export const Google_Redirect_URI=process.env.Google_Redirect_URI||'http://localh
 export const Google_Refresh_Token=process.env.Google_RefreshToken||'';
 export const Google_Calendar_id=process.env.Google_Calender_id||'primary';
 export const Temporal_GoogleCalendar_taskqueue=process.env.Temporal_GoogleCalendar_taskqueue||'google_calender_queue';
+export const Redis_Host=process.env.Redis_Host||'localhost';
+export const Redis_Port=Number(process.env.Redis_Port)||6379;
