@@ -12,7 +12,6 @@ import {
 } from "../repositories/booking.repository.js";
 import { StartBookingCancellationNotificationWorkflow, StartBookingNotificationWorkflow, StartCreateGoogleCalenderWorkflow, StartDeleteGoogleCalenderWorkflow, StartregenerateHostSlotWorkflow } from "../temporal/client.js";
 import { badRequest, notFound } from "../utils/api_error.js";
-import { slotRegeneration } from "./slot.service.js";
 async function triggerSlotregen(host_id:number,slot_start:Date){
     const start_time=slot_start.toISOString().split("T")[0];
         await StartregenerateHostSlotWorkflow({host_id,from:start_time,to:start_time});

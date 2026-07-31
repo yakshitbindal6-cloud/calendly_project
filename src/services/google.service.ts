@@ -1,8 +1,9 @@
-import {Google_Refresh_Token,Google_Calendar_id} from "../config/env.js";
+import {Google_Calendar_id} from "../config/env.js";
 import { createOAuthClient } from "../config/google.js";
 import { google } from "googleapis";
 import { findBookingById } from "../repositories/booking.repository.js";
 import { notFound } from "../utils/api_error.js";
+import { setGoogleRefreshToken,getGoogleRefreshToken } from "../repositories/redis.repository.js";
 export async function getGoogleAuthUrl() {
     const client = createOAuthClient();
     const url = client.generateAuthUrl({
@@ -23,7 +24,9 @@ export async function exchangesetup(code:string){
         throw new Error("no refresh token")
     }
     client.setCredentials(tokens);
-    
+     console.log("About to save refresh token:", tokens.refresh_token?.slice(0, 10) + "...");
+    await setGoogleRefreshToken(tokens.refresh_token)
+     console.log("Saved to Redis successfully");
     const oauth2 = google.oauth2({
         version: 'v2',
         auth: client
@@ -36,8 +39,10 @@ export async function exchangesetup(code:string){
 }
 export async function getGoogleCalendarClient(){
     const client = createOAuthClient();
+    const refreshToken=await getGoogleRefreshToken();
+    if(!refreshToken)throw new Error("No Google refresh token available. Complete the OAuth setup first.");
     client.setCredentials({
-        refresh_token:Google_Refresh_Token
+        refresh_token:refreshToken
     });
     return client;
 }
